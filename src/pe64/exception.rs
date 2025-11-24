@@ -198,6 +198,59 @@ impl<'a, P: Pe<'a>> UnwindInfo<'a, P> {
 		let len = self.image.CountOfCodes as usize;
 		unsafe { slice::from_raw_parts(self.image.UnwindCode.as_ptr(), len) }
 	}
+	pub fn handler(&self) -> Option<u32> {
+		let flags = self.flags();
+		if (flags & UNW_FLAG_EHANDLER) != 0 || (flags & UNW_FLAG_UHANDLER) != 0 {
+			let codes_len = self.image.CountOfCodes as usize;
+			let aligned_codes_len = if codes_len % 2 == 0 { codes_len } else { codes_len + 1 };
+			let offset = mem::size_of::<UNWIND_INFO>() + aligned_codes_len * mem::size_of::<UNWIND_CODE>();
+
+			// Get the slice from pe.image() that corresponds to UnwindInfo
+			let image_bytes = self.pe.image();
+			let info_ptr = self.image as *const _ as *const u8;
+			let start_ptr = image_bytes.as_ptr();
+
+			// Safety: assumes info_ptr points within image_bytes
+			// We can verify this or trust it because UnwindInfo is created from pe.slice
+			let start_offset = unsafe { info_ptr.offset_from(start_ptr) } as usize;
+
+			if start_offset + offset + 4 <= image_bytes.len() {
+				let handler_bytes = &image_bytes[start_offset + offset..start_offset + offset + 4];
+				let mut rva_bytes = [0u8; 4];
+				rva_bytes.copy_from_slice(handler_bytes);
+				Some(u32::from_le_bytes(rva_bytes))
+			}
+			else {
+				None
+			}
+		}
+		else {
+			None
+		}
+	}
+	pub fn exception_data(&self) -> Result<&'a [u8]> {
+		let flags = self.flags();
+		if (flags & UNW_FLAG_EHANDLER) != 0 || (flags & UNW_FLAG_UHANDLER) != 0 {
+			let codes_len = self.image.CountOfCodes as usize;
+			let aligned_codes_len = if codes_len % 2 == 0 { codes_len } else { codes_len + 1 };
+			let offset = mem::size_of::<UNWIND_INFO>() + aligned_codes_len * mem::size_of::<UNWIND_CODE>() + 4;
+
+			let image_bytes = self.pe.image();
+			let info_ptr = self.image as *const _ as *const u8;
+			let start_ptr = image_bytes.as_ptr();
+			let start_offset = unsafe { info_ptr.offset_from(start_ptr) } as usize;
+
+			if start_offset + offset <= image_bytes.len() {
+				Ok(&image_bytes[start_offset + offset..])
+			}
+			else {
+				Err(Error::Bounds)
+			}
+		}
+		else {
+			Err(Error::Bounds)
+		}
+	}
 }
 impl<'a, P: Pe<'a>> fmt::Debug for UnwindInfo<'a, P> {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

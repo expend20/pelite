@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::process;
 
 use pelite::image::IMAGE_FILE_MACHINE_ARM64;
+use pelite::pe64::Pe;
 use pelite::{FileMap, PeFile, Wrap};
 
 //----------------------------------------------------------------
@@ -221,7 +222,6 @@ fn main() {
 }
 
 fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
-	use pelite::pe64::Pe;
 	if args.dos {
 		let dos = file.dos_header();
 		print!("{}{:?}", SEPARATOR, dos);
@@ -291,22 +291,7 @@ fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
 		}
 	}
 	if args.exceptions {
-		use pelite::pe64::exception_arm64::Arm64ExceptionExt;
-
-		print!("{}", SEPARATOR);
-		let machine = file.file_header().Machine;
-		if machine == IMAGE_FILE_MACHINE_ARM64 {
-			match file.exception_arm64() {
-				Ok(exceptions) => print!("{:#?}", exceptions),
-				Err(_) => println!("No Exception Directory found."),
-			}
-		}
-		else if let Ok(exceptions) = file.exception() {
-			print!("{:#?}", exceptions);
-		}
-		else {
-			println!("No Exception Directory found.");
-		}
+		print_exception_directory_as_original_pedump(&file);
 	}
 	if args.debug_info {
 		print!("{}", SEPARATOR);
@@ -316,6 +301,128 @@ fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
 		else {
 			println!("No Debug Directory found.");
 		}
+	}
+}
+
+fn print_exception_directory_as_original_pedump(file: &pelite::pe64::PeFile) {
+	use pelite::pe64::exception_arm64::Arm64ExceptionExt;
+	use pelite::pe64::exception_fh4::UnwindInfoFh4Ext;
+
+	print!("{}", SEPARATOR);
+	if file.file_header().Machine == IMAGE_FILE_MACHINE_ARM64 {
+		match file.exception_arm64() {
+			Ok(exceptions) => print!("{:#?}", exceptions),
+			Err(_) => println!("No Exception Directory found."),
+		}
+		return;
+	}
+
+	match file.exception() {
+		Ok(exceptions) => {
+			println!("Exception Directory - {} entries", exceptions.image().len());
+			for (index, func) in exceptions.functions().enumerate() {
+				let image = func.image();
+				println!(
+					"[{:04}] begin=0x{:08x} end=0x{:08x} unwind=0x{:08x}",
+					index,
+					image.BeginAddress,
+					image.EndAddress,
+					image.UnwindData,
+				);
+
+				if let Ok(info) = func.unwind_info() {
+					println!("    Unwind version: {}", info.version());
+					println!("    Unwind flags: {:x}", info.flags());
+					println!("    Size of prologue: {:#x}", info.size_of_prolog());
+					println!("    Count of codes: {}", info.image().CountOfCodes);
+
+					if let Some(handler) = info.handler() {
+						println!("    Handler: {:08x}", handler);
+					}
+
+					if let Ok(fh4) = info.func_info4() {
+						println!("    EH Handler Data (FH4): Header {:02x}", fh4.header);
+						print_fh4_as_original_pedump(&fh4);
+					}
+				}
+			}
+		}
+		Err(_) => println!("No Exception Directory found."),
+	}
+}
+
+fn print_fh4_as_original_pedump(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
+	println!("    Unwind Map:");
+	println!("      Current State  Next State | Raw: Offset   Next Offset | Action");
+	
+	// Helper to find state by offset
+	let find_state_by_offset = |target_offset: u32| -> i32 {
+		for (idx, entry) in fh4.unwind_map.iter().enumerate() {
+			if entry.offset == target_offset {
+				return idx as i32;
+			}
+		}
+		-1
+	};
+
+	for (i, entry) in fh4.unwind_map.iter().enumerate() {
+		let action_str = if entry.type_ == 3 {
+			format!("Dtor RVA: {:08x}", entry.action)
+		} else {
+			"No unwind state".to_string()
+		};
+		
+		let target_offset = (entry.offset as i32 + entry.next_offset) as u32;
+		let next_state = find_state_by_offset(target_offset);
+
+		// Format next_offset as signed hex (e.g. -00000001) to match original pedump
+		let next_offset_hex = if entry.next_offset < 0 {
+			format!("-{:08x}", -entry.next_offset)
+		} else {
+			format!("{:08x}", entry.next_offset)
+		};
+
+		println!("      {:13}  {:10} |    {:08x}     {:>9} | {}", 
+			i, 
+			next_state, 
+			entry.offset, 
+			next_offset_hex, 
+			action_str
+		);
+	}
+	
+	println!("\n    Number of Try Blocks:          {:08x}", fh4.try_block_map.len());
+	for (i, entry) in fh4.try_block_map.iter().enumerate() {
+		println!("    Try Block Map #{}:", i);
+		println!("      Lowest Try State:                    {}", entry.try_low);
+		println!("      Highest Try State:                   {}", entry.try_high);
+		println!("      Highest State of Associated Catches: {}", entry.catch_high);
+		println!("      RVA to Catch Handler Array:          {:08x}", entry.handlers_rva);
+		
+		println!("\n      Number of Associated Catches:        {:08x}", entry.handlers.len());
+		for (j, handler) in entry.handlers.iter().enumerate() {
+			println!("      Catch Handler #{}:", j);
+			println!("        Handler Type Adjectives:                {:08x}", handler.adjectives);
+			println!("        RVA to Type Descriptor:                 {:08x}", handler.type_desc_rva);
+			println!("        Frame offset of Catch Object:           {:08x}", handler.catch_obj_offset);
+			println!("        RVA to Catch Handler:                   {:08x}", handler.handler_rva);
+		}
+	}
+	
+	println!("\n    Number of IP Map Entries:      {:08}", fh4.ip_to_state_map.len());
+	println!("    IP (relative to segment or function start) to State Map:");
+	println!("            IP      State | Raw Data: IP Offset   State+1");
+	for entry in fh4.ip_to_state_map.iter() {
+		// pedump prints "Raw Data" columns as the decoded delta/state values in HEX?
+		// Entry 1: Delta 13 (0x13). Printed "13".
+		// Entry 2: Delta 64 (0x40). Printed "40".
+		// State+1: -1->0 (0), 0->1 (1).
+		println!("      {:08x} {:10} |                  {:02x}         {:1x}", 
+			entry.ip_offset, 
+			entry.state, 
+			entry.delta, 
+			entry.state + 1
+		);
 	}
 }
 
