@@ -3,6 +3,12 @@ use crate::{Error, Result};
 use super::Pe;
 
 /// Variable length integer reader for FH4.
+///
+/// FH4 uses a nested continuation bit scheme:
+/// - 1 byte:  if bit0=0, value = byte >> 1 (7 bits of data)
+/// - 2 bytes: if bit0=1, bit1=0, value = (b0 >> 2) | (b1 << 6) (6+8=14 bits)
+/// - 3 bytes: if bit0=1, bit1=1, b1.bit0=0, value = (b0 >> 3) | ((b1 >> 1) << 5) | (b2 << 12) (5+7+8=20 bits)
+/// - 4 bytes: if bit0=1, bit1=1, b1.bit0=1, value = (b0 >> 3) | ((b1 >> 2) << 5) | (b2 << 11) | (b3 << 19) (5+6+8+8=27 bits)
 pub struct UVarIntReader<'a> {
 	pub ptr: &'a [u8],
 }
@@ -11,26 +17,49 @@ impl<'a> UVarIntReader<'a> {
 		Self { ptr }
 	}
 	pub fn read_u32(&mut self) -> Result<u32> {
-		let mut result = 0u32;
-		let mut shift = 0;
-		loop {
-			if self.ptr.is_empty() {
-				return Err(Error::Bounds);
-			}
-			let b = self.ptr[0];
-			self.ptr = &self.ptr[1..];
-
-			let val = (b >> 1) as u32;
-			let has_more = (b & 1) != 0;
-
-			result |= val << shift;
-			shift += 7;
-
-			if !has_more {
-				break;
-			}
+		if self.ptr.is_empty() {
+			return Err(Error::Bounds);
 		}
-		Ok(result)
+		let b0 = self.ptr[0];
+		self.ptr = &self.ptr[1..];
+
+		// 1 byte: bit0 = 0
+		if (b0 & 1) == 0 {
+			return Ok((b0 >> 1) as u32);
+		}
+
+		// 2+ bytes: bit0 = 1
+		if self.ptr.is_empty() {
+			return Err(Error::Bounds);
+		}
+		let b1 = self.ptr[0];
+		self.ptr = &self.ptr[1..];
+
+		// 2 bytes: bit1 = 0
+		if (b0 & 2) == 0 {
+			return Ok(((b0 >> 2) as u32) | ((b1 as u32) << 6));
+		}
+
+		// 3+ bytes: bit1 = 1
+		if self.ptr.is_empty() {
+			return Err(Error::Bounds);
+		}
+		let b2 = self.ptr[0];
+		self.ptr = &self.ptr[1..];
+
+		// 3 bytes: b1.bit0 = 0
+		if (b1 & 1) == 0 {
+			return Ok(((b0 >> 3) as u32) | (((b1 >> 1) as u32) << 5) | ((b2 as u32) << 12));
+		}
+
+		// 4 bytes: b1.bit0 = 1
+		if self.ptr.is_empty() {
+			return Err(Error::Bounds);
+		}
+		let b3 = self.ptr[0];
+		self.ptr = &self.ptr[1..];
+
+		Ok(((b0 >> 3) as u32) | (((b1 >> 2) as u32) << 5) | ((b2 as u32) << 11) | ((b3 as u32) << 19))
 	}
 	pub fn read_i32(&mut self) -> Result<i32> {
 		Ok(self.read_u32()? as i32)
