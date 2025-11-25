@@ -1,0 +1,1031 @@
+Microsoft (R) COFF/PE Dumper Version 14.43.34809.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file e:\temp\pelite\tests\exceptions\test_array_nofh4.exe
+
+File Type: EXECUTABLE IMAGE
+
+Function Table (85)
+
+           Begin    End      Info      Function Name
+
+  00000000 00001500 000015BA 00009EC4  main
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x1C
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x78
+    Handler: 00001271 @ILT+620(__GSHandlerCheck_EH)
+    EH Handler Data: 00008BE8
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     4
+      RVA to Unwind Map:             00009ED8
+      Number of Try Blocks:          00000001
+      RVA to Try Block Map:          00009EF8
+      Number of IP Map Entries:      00000008
+      RVA to IP to State Map:        00009F20
+      Frame Offset of Unwind Helper: 00000040
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000001
+    IP to State Map:
+            IP      State
+      00001177         -1
+      0000151C          0
+      0000155C          1
+      00001570          2
+      000015A4         -1
+      0000637A          0
+      00006387          3
+      000063CB          0
+    Unwind Map:
+      Current State  Next State  RVA to Action
+                  0          -1       00000000
+                  1           0       00006350
+                  2           0       00003F7B
+                  3          -1       00000000
+    Try Block Map #0:
+      Lowest Try State:                    0
+      Highest Try State:                   2
+      Highest State of Associated Catches: 3
+      Number of Associated Catches:        00000001
+      RVA to Catch Handler Array:          00009F0C
+      Catch Handler #0:
+        Handler Type Adjectives:                00000009
+        RVA to Type Descriptor:                 0000B190
+        Frame offset of Catch Object:           00000030
+        RVA to Catch Handler:                   0000637A
+        Distance Between Handler and Parent FP: 00000048
+    GS Unwind flags: EHandler UHandler HasAlignment
+    Cookie Offset: 00001170
+    Aligned Base Offset: FFFFFFFF
+    Alignment: 0000151C
+
+  0000000C 000015F0 000019D0 00009DF8  ??$?6U?$char_traits@D@std@@@std@@YAAEAV?$basic_ostream@DU?$char_traits@D@std@@@0@AEAV10@PEBD@Z (class std::basic_ostream<char,struct std::char_traits<char> > & __cdecl std::operator<<<struct std::char_traits<char> >(class std::basic_ostream<char,struct std::char_traits<char> > &,char const *))
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x1D
+    Count of codes: 2
+    Unwind codes:
+      11: ALLOC_LARGE, size=0xA8
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008C58
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     3
+      RVA to Unwind Map:             00009E0C
+      Number of Try Blocks:          00000001
+      RVA to Try Block Map:          00009E28
+      Number of IP Map Entries:      00000008
+      RVA to IP to State Map:        00009E60
+      Frame Offset of Unwind Helper: 00000098
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000001
+    IP to State Map:
+            IP      State
+      00001046         -1
+      000016E4          0
+      0000170C          1
+      00001973          0
+      000019B3         -1
+      00006400          0
+      0000640D          2
+      0000643A          0
+    Unwind Map:
+      Current State  Next State  RVA to Action
+                  0          -1       00006460
+                  1           0       00000000
+                  2           0       00000000
+    Try Block Map #0:
+      Lowest Try State:                    1
+      Highest Try State:                   1
+      Highest State of Associated Catches: 2
+      Number of Associated Catches:        00000001
+      RVA to Catch Handler Array:          00009E40
+      Catch Handler #0:
+        Handler Type Adjectives:                00000040
+        RVA to Type Descriptor:                 00000000
+        Frame offset of Catch Object:           00000000
+        RVA to Catch Handler:                   00006400
+        Distance Between Handler and Parent FP: 00000038
+
+  00000018 00001AD0 00001B5E 00009DD0  ??0Element@@QEAA@XZ (public: __cdecl Element::Element(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x48
+
+  00000024 00001B90 00001C00 00009F8C  ??0_Sentry_base@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAA@AEAV12@@Z (public: __cdecl std::basic_ostream<char,struct std::char_traits<char> >::_Sentry_base::_Sentry_base(class std::basic_ostream<char,struct std::char_traits<char> > &))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0E
+    Count of codes: 1
+    Unwind codes:
+      0E: ALLOC_SMALL, size=0x38
+
+  00000030 00001C20 00001C79 00009D98  ??0exception@std@@QEAA@AEBV01@@Z (public: __cdecl std::exception::exception(class std::exception const &))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0F
+    Count of codes: 2
+    Unwind codes:
+      0F: ALLOC_SMALL, size=0x20
+      0B: PUSH_NONVOL, register=rdi
+
+  0000003C 00001C90 00001CF4 00009D90  ??0exception@std@@QEAA@QEBD@Z (public: __cdecl std::exception::exception(char const * const))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0F
+    Count of codes: 2
+    Unwind codes:
+      0F: ALLOC_SMALL, size=0x30
+      0B: PUSH_NONVOL, register=rdi
+
+  00000048 00001D10 00001D78 00009DC0  ??0runtime_error@std@@QEAA@AEBV01@@Z (public: __cdecl std::runtime_error::runtime_error(class std::runtime_error const &))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0F
+    Count of codes: 2
+    Unwind codes:
+      0F: ALLOC_SMALL, size=0x20
+      0B: PUSH_NONVOL, register=rdi
+
+  00000054 00001DA0 00001DD6 00009DB0  ??0runtime_error@std@@QEAA@PEBD@Z (public: __cdecl std::runtime_error::runtime_error(char const *))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0E
+    Count of codes: 1
+    Unwind codes:
+      0E: ALLOC_SMALL, size=0x28
+
+  00000060 00001DF0 00001ED7 00009FB0  ??0sentry@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAA@AEAV12@@Z (public: __cdecl std::basic_ostream<char,struct std::char_traits<char> >::sentry::sentry(class std::basic_ostream<char,struct std::char_traits<char> > &))
+    Unwind version: 1
+    Unwind flags: UHANDLER
+    Size of prologue: 0x17
+    Count of codes: 1
+    Unwind codes:
+      0E: ALLOC_SMALL, size=0x48
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008CB8
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     1
+      RVA to Unwind Map:             00009FC4
+      Number of Try Blocks:          00000000
+      RVA to Try Block Map:          00000000
+      Number of IP Map Entries:      00000003
+      RVA to IP to State Map:        00009FD0
+      Frame Offset of Unwind Helper: 00000030
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000001
+    IP to State Map:
+            IP      State
+      0000106E         -1
+      00001E17          0
+      00001ECD         -1
+    Unwind Map:
+      Current State  Next State  RVA to Action
+                  0          -1       00006490
+
+  0000006C 00001F10 00001F5A 00009DD8  ??1Element@@QEAA@XZ (public: __cdecl Element::~Element(void))
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x12
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x38
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008C28
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     0
+      RVA to Unwind Map:             00000000
+      Number of Try Blocks:          00000000
+      RVA to Try Block Map:          00000000
+      Number of IP Map Entries:      00000001
+      RVA to IP to State Map:        00009DF0
+      Frame Offset of Unwind Helper: 00000020
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000005
+    IP to State Map:
+            IP      State
+      00001262         -1
+
+  00000078 00001F70 00001FD2 00009F94  ??1_Sentry_base@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAA@XZ (public: __cdecl std::basic_ostream<char,struct std::char_traits<char> >::_Sentry_base::~_Sentry_base(void))
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x12
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x48
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008C88
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     0
+      RVA to Unwind Map:             00000000
+      Number of Try Blocks:          00000000
+      RVA to Try Block Map:          00000000
+      Number of IP Map Entries:      00000001
+      RVA to IP to State Map:        00009FA8
+      Frame Offset of Unwind Helper: 00000030
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000005
+    IP to State Map:
+            IP      State
+      000010FA         -1
+
+  00000084 00001FF0 0000201F 00009DB8  ??1runtime_error@std@@UEAA@XZ (public: virtual __cdecl std::runtime_error::~runtime_error(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x28
+
+  00000090 00002030 00002082 00009FF4  ??1sentry@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAA@XZ (public: __cdecl std::basic_ostream<char,struct std::char_traits<char> >::sentry::~sentry(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x38
+
+  0000009C 000020A0 000020F3 00009DA8  ??_Eexception@std@@UEAAPEAXI@Z (public: virtual void * __cdecl std::exception::`vector deleting destructor'(unsigned int))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0D
+    Count of codes: 1
+    Unwind codes:
+      0D: ALLOC_SMALL, size=0x28
+
+  000000A8 00002110 00002163 00009DC8  ??_Eruntime_error@std@@UEAAPEAXI@Z (public: virtual void * __cdecl std::runtime_error::`vector deleting destructor'(unsigned int))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0D
+    Count of codes: 1
+    Unwind codes:
+      0D: ALLOC_SMALL, size=0x28
+
+  000000B4 00002180 000021B8 00009DA0  ?what@exception@std@@UEBAPEBDXZ (public: virtual char const * __cdecl std::exception::what(void)const )
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x18
+
+  000000C0 0000221C 0000228C 00009FFC  ??_L@YAXPEAX_K1P6AX0@Z2@Z (void __cdecl `eh vector constructor iterator'(void *,unsigned __int64,unsigned __int64,void (__cdecl*)(void *),void (__cdecl*)(void *)))
+    Unwind version: 1
+    Unwind flags: UHANDLER
+    Size of prologue: 0x1C
+    Count of codes: 8
+    Unwind codes:
+      1C: SAVE_NONVOL, register=rsi offset=0x68
+      1C: SAVE_NONVOL, register=rbx offset=0x60
+      1C: ALLOC_SMALL, size=0x30
+      18: PUSH_NONVOL, register=r15
+      16: PUSH_NONVOL, register=r14
+      14: PUSH_NONVOL, register=rdi
+    Handler: 00003F99 __C_specific_handler
+
+    Count of scope table entries: 1
+
+      Begin    End      Handler  Target
+
+      0000224D 00002278 000064AE 00000000
+
+  000000CC 000022B4 0000231F 0000A034  ??_M@YAXPEAX_K1P6AX0@Z@Z (void __cdecl `eh vector destructor iterator'(void *,unsigned __int64,unsigned __int64,void (__cdecl*)(void *)))
+    Unwind version: 1
+    Unwind flags: UHANDLER
+    Size of prologue: 0x18
+    Count of codes: 5
+    Unwind codes:
+      18: ALLOC_SMALL, size=0x38
+      14: PUSH_NONVOL, register=r14
+      12: PUSH_NONVOL, register=rdi
+      11: PUSH_NONVOL, register=rsi
+      10: PUSH_NONVOL, register=rbx
+    Handler: 00003F99 __C_specific_handler
+
+    Count of scope table entries: 1
+
+      Begin    End      Handler  Target
+
+      000022E7 00002315 000064E5 00000000
+
+  000000D8 00002348 00002387 0000A0A8
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x30
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rdi
+
+  000000E4 00002398 000023F9 0000A068  ?__ArrayUnwind@@YAXPEAX_K1P6AX0@Z@Z (void __cdecl __ArrayUnwind(void *,unsigned __int64,unsigned __int64,void (__cdecl*)(void *)))
+    Unwind version: 1
+    Unwind flags: EHANDLER
+    Size of prologue: 0x18
+    Count of codes: 8
+    Unwind codes:
+      18: SAVE_NONVOL, register=rsi offset=0x80
+      18: SAVE_NONVOL, register=rbx offset=0x78
+      18: ALLOC_SMALL, size=0x50
+      14: PUSH_NONVOL, register=r15
+      12: PUSH_NONVOL, register=r14
+      10: PUSH_NONVOL, register=rdi
+    Handler: 00003F99 __C_specific_handler
+
+    Count of scope table entries: 1
+
+      Begin    End      Handler  Target
+
+      000023BC 000023E3 0000651C 000023E3
+
+  000000F0 0000241C 0000249B 0000A0B8  __GSHandlerCheck_EH
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x19
+    Count of codes: 10
+    Unwind codes:
+      19: SAVE_NONVOL, register=rdi offset=0x48
+      19: SAVE_NONVOL, register=rsi offset=0x40
+      19: SAVE_NONVOL, register=rbp offset=0x38
+      19: SAVE_NONVOL, register=rbx offset=0x30
+      19: ALLOC_SMALL, size=0x20
+      15: PUSH_NONVOL, register=r14
+
+  000000FC 000024D0 000024EE 0000A0D8  __security_check_cookie
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x00
+    Count of codes: 0
+
+  00000108 0000250C 00002537 0000A0DC  ??_Etype_info@@UEAAPEAXI@Z (public: virtual void * __cdecl type_info::`vector deleting destructor'(unsigned int))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  00000114 00002544 000025FA 0000A10C
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  00000120 00002628 00002638 0000A114
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000012C 0000263C 00002655 0000A11C
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000138 0000265C 0000266E 0000A16C
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000144 00002674 000027F0 0000A124
+    Unwind version: 1
+    Unwind flags: EHANDLER
+    Size of prologue: 0x0F
+    Count of codes: 6
+    Unwind codes:
+      0F: SAVE_NONVOL, register=rsi offset=0x48
+      0F: SAVE_NONVOL, register=rbx offset=0x40
+      0F: ALLOC_SMALL, size=0x30
+      0B: PUSH_NONVOL, register=rdi
+    Handler: 00003F99 __C_specific_handler
+
+    Count of scope table entries: 2
+
+      Begin    End      Handler  Target
+
+      0000269D 000027A2 00006592 000027A2
+      000027D6 000027E8 00006592 000027A2
+
+  00000150 00002850 00002864 0000A0E4  ?configure_argv@__scrt_narrow_argv_policy@@SAHXZ (public: static int __cdecl __scrt_narrow_argv_policy::configure_argv(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000015C 00002874 000028AA 0000A0FC
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x30
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rdi
+
+  00000168 000028C4 000028DE 0000A0F4  ?set_commode@__scrt_file_policy@@SAXXZ (public: static void __cdecl __scrt_file_policy::set_commode(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  00000174 000028E4 000028F8 0000A0EC  ?set_fmode@__scrt_file_policy@@SAXXZ (public: static void __cdecl __scrt_file_policy::set_fmode(void))
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000180 00002900 00002912 0000A174  mainCRTStartup
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000018C 00002978 000029AB 0000A18C  __castguard_check_failure_os_handled
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000198 000029B8 000029CF 0000A17C
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001A4 000029D4 00002A0B 0000A194  __castguard_check_failure_user_handled
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001B0 00002A18 00002A33 0000A184
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001BC 00002B00 00002B4C 0000A19C  __castguard_slow_path_check_os_handled
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001C8 00002B60 00002BB0 0000A1A4  __castguard_slow_path_check_user_handled
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001D4 00002C0C 00002C29 0000A1B4  __GSHandlerCheck
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000001E0 00002C30 00002C8B 0000A1AC  __GSHandlerCheckCommon
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x02
+    Count of codes: 1
+    Unwind codes:
+      02: PUSH_NONVOL, register=rbx
+
+  000001EC 00002CA4 00002CD8 0000A1FC  __raise_securityfailure
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  000001F8 00002CE8 00002DBB 0000A1D4  __report_gsfailure
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 1
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x38
+
+  00000204 00002DF0 00002E04 0000A1CC  __report_rangecheckfailure
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000210 00002E0C 00002EA9 0000A1BC  __report_securityfailure
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x08
+    Count of codes: 1
+    Unwind codes:
+      08: ALLOC_SMALL, size=0x28
+
+  0000021C 00002ED0 00002FE0 0000A1C4  __report_securityfailureEx
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x11
+    Count of codes: 1
+    Unwind codes:
+      11: ALLOC_SMALL, size=0x38
+
+  00000228 00003024 00003091 0000A1DC
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x68
+      0A: ALLOC_SMALL, size=0x40
+      06: PUSH_NONVOL, register=rdi
+
+  00000234 000030AC 0000311D 0000A1EC
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x08
+    Count of codes: 4
+    Unwind codes:
+      08: ALLOC_SMALL, size=0x40
+      04: PUSH_NONVOL, register=rdi
+      03: PUSH_NONVOL, register=rsi
+      02: PUSH_NONVOL, register=rbx
+
+  00000240 000031E0 00003219 0000A240  __scrt_acquire_startup_lock
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000024C 00003228 0000325C 0000A288  __scrt_dllmain_after_initialize_c
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000258 0000326C 00003281 0000A280  __scrt_dllmain_before_initialize_c
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000264 00003288 000032B0 0000A2A0  __scrt_dllmain_crt_thread_attach
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000270 000032BC 000032D1 0000A2A8  __scrt_dllmain_crt_thread_detach
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000027C 000032D8 00003338 0000A268  __scrt_dllmain_exception_filter
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x14
+    Count of codes: 8
+    Unwind codes:
+      14: SAVE_NONVOL, register=rsi offset=0x40
+      14: SAVE_NONVOL, register=rbp offset=0x38
+      14: SAVE_NONVOL, register=rbx offset=0x30
+      14: ALLOC_SMALL, size=0x20
+      10: PUSH_NONVOL, register=rdi
+
+  00000288 00003350 00003380 0000A290  __scrt_dllmain_uninitialize_c
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000294 0000338C 000033A0 0000A298  __scrt_dllmain_uninitialize_critical
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000002A0 000033A8 000033E2 0000A250  __scrt_initialize_crt
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000002AC 000033F0 0000347B 0000A260  __scrt_initialize_onexit_tables
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  000002B8 000034A0 00003538 0000A214  __scrt_is_nonwritable_in_current_image
+    Unwind version: 1
+    Unwind flags: EHANDLER
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x18
+    Handler: 00003F99 __C_specific_handler
+
+    Count of scope table entries: 1
+
+      Begin    End      Handler  Target
+
+      000034A7 00003531 000065B7 00003531
+
+  000002C4 00003560 00003584 0000A248  __scrt_release_startup_lock
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  000002D0 00003590 000035B9 0000A258  __scrt_uninitialize_crt
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  000002DC 000035C4 000035FE 0000A20C  _onexit
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbx
+
+  000002E8 00003630 00003647 0000A204  atexit
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  000002F4 0000364C 000036B7 0000A2C0
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x09
+    Count of codes: 2
+    Unwind codes:
+      09: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  00000300 000036D4 00003780 0000A2B0  __security_init_cookie
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0D
+    Count of codes: 4
+    Unwind codes:
+      0D: SAVE_NONVOL, register=rbx offset=0x50
+      0D: ALLOC_SMALL, size=0x30
+      06: PUSH_NONVOL, register=rbp
+
+  0000030C 00003814 0000382F 0000A2C8  __scrt_initialize_default_local_stdio_options
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  00000318 0000386C 000039B4 0000A2E0  __scrt_fastfail
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x15
+    Count of codes: 5
+    Unwind codes:
+      15: SAVE_NONVOL, register=rbx offset=0x5D0
+      15: ALLOC_LARGE, size=0x5C0
+      06: PUSH_NONVOL, register=rbp
+
+  00000324 00003A08 00003A42 0000A2D0  __scrt_get_show_window_mode
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x07
+    Count of codes: 2
+    Unwind codes:
+      07: ALLOC_LARGE, size=0x98
+
+  00000330 00003A5C 00003AAD 0000A2D8  __scrt_is_managed_app
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x04
+    Count of codes: 1
+    Unwind codes:
+      04: ALLOC_SMALL, size=0x28
+
+  0000033C 00003ADC 00003B37 0000A2F4  __scrt_unhandled_exception_filter
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x30
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rdi
+
+  00000348 00003B50 00003B8C 0000A304  _RTC_Initialize
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x30
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rdi
+
+  00000354 00003B9C 00003BD8 0000A314  _RTC_Terminate
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x0A
+    Count of codes: 4
+    Unwind codes:
+      0A: SAVE_NONVOL, register=rbx offset=0x30
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rdi
+
+  00000360 00003BF0 00003EBA 0000A334  __isa_available_init
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x15
+    Count of codes: 8
+    Unwind codes:
+      15: SAVE_NONVOL, register=rsi offset=0x40
+      15: SAVE_NONVOL, register=rbx offset=0x38
+      15: ALLOC_SMALL, size=0x10
+      0E: PUSH_NONVOL, register=r14
+      0C: PUSH_NONVOL, register=rdi
+      0B: PUSH_NONVOL, register=rbp
+
+  0000036C 00005320 00005322 0000A328  _guard_dispatch_icall_nop
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x00
+    Count of codes: 0
+
+  00000378 00005340 00005346 0000A330  _guard_xfg_dispatch_icall_nop
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x00
+    Count of codes: 0
+
+  00000384 00006350 0000637A 00009F60
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  00000390 0000637A 000063D9 00009F68
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x0A
+    Count of codes: 2
+    Unwind codes:
+      0A: ALLOC_SMALL, size=0x30
+      06: PUSH_NONVOL, register=rbp
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008BE8
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     4
+      RVA to Unwind Map:             00009ED8
+      Number of Try Blocks:          00000001
+      RVA to Try Block Map:          00009EF8
+      Number of IP Map Entries:      00000008
+      RVA to IP to State Map:        00009F20
+      Frame Offset of Unwind Helper: 00000040
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000001
+    IP to State Map:
+            IP      State
+      00001177         -1
+      0000151C          0
+      0000155C          1
+      00001570          2
+      000015A4         -1
+      0000637A          0
+      00006387          3
+      000063CB          0
+    Unwind Map:
+      Current State  Next State  RVA to Action
+                  0          -1       00000000
+                  1           0       00006350
+                  2           0       00003F7B
+                  3          -1       00000000
+    Try Block Map #0:
+      Lowest Try State:                    0
+      Highest Try State:                   2
+      Highest State of Associated Catches: 3
+      Number of Associated Catches:        00000001
+      RVA to Catch Handler Array:          00009F0C
+      Catch Handler #0:
+        Handler Type Adjectives:                00000009
+        RVA to Type Descriptor:                 0000B190
+        Frame offset of Catch Object:           00000030
+        RVA to Catch Handler:                   0000637A
+        Distance Between Handler and Parent FP: 00000048
+
+  0000039C 00006400 00006448 00009EB0
+    Unwind version: 1
+    Unwind flags: EHANDLER UHANDLER
+    Size of prologue: 0x0A
+    Count of codes: 2
+    Unwind codes:
+      0A: ALLOC_SMALL, size=0x20
+      06: PUSH_NONVOL, register=rbp
+    Handler: 00003F93 __CxxFrameHandler3
+    EH Handler Data: 00008C58
+    Function Info:
+      Magic Number:                  19930522
+      BBT Flags:                     00000000
+      Max State:                     3
+      RVA to Unwind Map:             00009E0C
+      Number of Try Blocks:          00000001
+      RVA to Try Block Map:          00009E28
+      Number of IP Map Entries:      00000008
+      RVA to IP to State Map:        00009E60
+      Frame Offset of Unwind Helper: 00000098
+      RVA to ES Type List:           00000000
+      EH Flags:                      00000001
+    IP to State Map:
+            IP      State
+      00001046         -1
+      000016E4          0
+      0000170C          1
+      00001973          0
+      000019B3         -1
+      00006400          0
+      0000640D          2
+      0000643A          0
+    Unwind Map:
+      Current State  Next State  RVA to Action
+                  0          -1       00006460
+                  1           0       00000000
+                  2           0       00000000
+    Try Block Map #0:
+      Lowest Try State:                    1
+      Highest Try State:                   1
+      Highest State of Associated Catches: 2
+      Number of Associated Catches:        00000001
+      RVA to Catch Handler Array:          00009E40
+      Catch Handler #0:
+        Handler Type Adjectives:                00000040
+        RVA to Type Descriptor:                 00000000
+        Frame offset of Catch Object:           00000000
+        RVA to Catch Handler:                   00006400
+        Distance Between Handler and Parent FP: 00000038
+
+  000003A8 00006460 0000647B 00009EA8
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  000003B4 00006490 000064A8 00009FEC
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  000003C0 000064AE 000064DA 0000A02C
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  000003CC 000064E5 00006511 0000A060
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  000003D8 0000651C 0000657B 0000A098
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x07
+    Count of codes: 3
+    Unwind codes:
+      07: ALLOC_SMALL, size=0x28
+      03: PUSH_NONVOL, register=rbp
+      02: PUSH_NONVOL, register=rbx
+
+  000003E4 00006592 000065B0 0000A164
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x06
+    Count of codes: 2
+    Unwind codes:
+      06: ALLOC_SMALL, size=0x20
+      02: PUSH_NONVOL, register=rbp
+
+  000003F0 000065B7 000065CF 0000A238
+    Unwind version: 1
+    Unwind flags: None
+    Size of prologue: 0x02
+    Count of codes: 1
+    Unwind codes:
+      02: PUSH_NONVOL, register=rbp
+
+
+  Summary
+
+        1000 .00cfg
+        1000 .data
+        2000 .idata
+        1000 .pdata
+        3000 .rdata
+        1000 .reloc
+        1000 .rsrc
+        7000 .text

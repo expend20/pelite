@@ -108,21 +108,63 @@ pub struct IpStateEntry {
 	pub state: i32,
 }
 
+/// FH4 header flag bits
+/// These control which optional RVA fields are present in the FH4 header
+const FH4_HAS_BBT_FLAGS: u8 = 0x01;      // BBT flags present (4 bytes)
+const FH4_HAS_UNWIND_MAP: u8 = 0x08;     // Unwind map RVA present
+const FH4_HAS_TRY_BLOCK_MAP: u8 = 0x10;  // Try block map RVA present
+const FH4_HAS_IP_TO_STATE: u8 = 0x20;    // IP to state map RVA present
+#[allow(dead_code)]
+const FH4_IS_CATCH_FUNCLET: u8 = 0x02;   // Is catch funclet
+#[allow(dead_code)]
+const FH4_HAS_SEPARATE_GS: u8 = 0x04;    // Has separate GS unwind info
+
 impl FuncInfo4 {
 	pub fn parse<'a, P: Pe<'a>>(pe: P, data: &[u8]) -> Result<FuncInfo4> {
-		if data.len() < 13 {
+		if data.is_empty() {
 			return Err(Error::Bounds);
 		}
 
 		let header = data[0];
-		// Read 3 u32s (unaligned)
-		let mut buf = [0u8; 4];
-		buf.copy_from_slice(&data[1..5]);
-		let unwind_rva = u32::from_le_bytes(buf);
-		buf.copy_from_slice(&data[5..9]);
-		let try_rva = u32::from_le_bytes(buf);
-		buf.copy_from_slice(&data[9..13]);
-		let ip_rva = u32::from_le_bytes(buf);
+		let mut offset = 1usize;
+		
+		// Skip BBT flags if present (4 bytes)
+		if (header & FH4_HAS_BBT_FLAGS) != 0 {
+			offset += 4;
+		}
+		
+		// Read Unwind Map RVA if present
+		let unwind_rva = if (header & FH4_HAS_UNWIND_MAP) != 0 {
+			if data.len() < offset + 4 { return Err(Error::Bounds); }
+			let mut buf = [0u8; 4];
+			buf.copy_from_slice(&data[offset..offset + 4]);
+			offset += 4;
+			u32::from_le_bytes(buf)
+		} else {
+			0
+		};
+		
+		// Read Try Block Map RVA if present
+		let try_rva = if (header & FH4_HAS_TRY_BLOCK_MAP) != 0 {
+			if data.len() < offset + 4 { return Err(Error::Bounds); }
+			let mut buf = [0u8; 4];
+			buf.copy_from_slice(&data[offset..offset + 4]);
+			offset += 4;
+			u32::from_le_bytes(buf)
+		} else {
+			0
+		};
+		
+		// Read IP to State Map RVA if present
+		let ip_rva = if (header & FH4_HAS_IP_TO_STATE) != 0 {
+			if data.len() < offset + 4 { return Err(Error::Bounds); }
+			let mut buf = [0u8; 4];
+			buf.copy_from_slice(&data[offset..offset + 4]);
+			// offset += 4; // Not needed, no more fields after this
+			u32::from_le_bytes(buf)
+		} else {
+			0
+		};
 
 		// Parse Unwind Map
 		let mut unwind_map = Vec::new();
@@ -193,27 +235,37 @@ impl FuncInfo4 {
 					let h_count = h_reader.read_u32()?;
 					
 					for _ in 0..h_count {
-						// First field seems to be a generic u8 or flags, not UVarInt?
-						// In the example: 07 12 ...
-						// 07 has bit 0 set, so if UVarInt it consumes next byte.
-						// But next byte 12 is Adjectives (yielding 9).
-						// So we must read 07 as a raw byte.
+						// Header byte contains flags indicating which optional fields are present:
+						// Bit 0: adjectives present (always set in practice)
+						// Bit 1: type descriptor RVA present
+						// Bit 2: catch object offset present
+						// Bit 3+: continuation offset bits
 						if h_reader.ptr.is_empty() { return Err(Error::Bounds); }
-						let u1 = h_reader.ptr[0] as u32;
+						let header = h_reader.ptr[0];
 						h_reader.ptr = &h_reader.ptr[1..];
 
+						// Adjectives are always present (indicated by bit 0, but always set)
 						let adj = h_reader.read_u32()?;
 						
-						// Type Desc RVA
-						if h_reader.ptr.len() < 4 { return Err(Error::Bounds); }
-						let mut buf = [0u8; 4];
-						buf.copy_from_slice(&h_reader.ptr[0..4]);
-						h_reader.ptr = &h_reader.ptr[4..];
-						let type_desc_rva = u32::from_le_bytes(buf);
+						// Type Desc RVA - only present if bit 1 set
+						let type_desc_rva = if (header & 0x02) != 0 {
+							if h_reader.ptr.len() < 4 { return Err(Error::Bounds); }
+							let mut buf = [0u8; 4];
+							buf.copy_from_slice(&h_reader.ptr[0..4]);
+							h_reader.ptr = &h_reader.ptr[4..];
+							u32::from_le_bytes(buf)
+						} else {
+							0
+						};
 						
-						let catch_obj = h_reader.read_u32()?;
+						// Catch object offset - only present if bit 2 set
+						let catch_obj = if (header & 0x04) != 0 {
+							h_reader.read_u32()?
+						} else {
+							0
+						};
 						
-						// Handler RVA
+						// Handler RVA - always present
 						if h_reader.ptr.len() < 4 { return Err(Error::Bounds); }
 						let mut buf = [0u8; 4];
 						buf.copy_from_slice(&h_reader.ptr[0..4]);
@@ -221,7 +273,7 @@ impl FuncInfo4 {
 						let handler_rva = u32::from_le_bytes(buf);
 						
 						handlers.push(HandlerEntry {
-							unknown1: u1,
+							unknown1: header as u32,
 							adjectives: adj,
 							type_desc_rva,
 							catch_obj_offset: catch_obj,
@@ -276,10 +328,38 @@ impl FuncInfo4 {
 }
 
 /// Attempts to parse FH4 data that may either be embedded directly or referenced indirectly.
+///
+/// Different exception handlers store FH4 data differently:
+/// - `__CxxFrameHandler4`: stores RVA to FH4 data in exception_data
+/// - `__GSHandlerCheck_EH4`: may embed FH4 data directly
+///
+/// This function tries both interpretations and returns the one that yields more
+/// meaningful content (more map entries), since incorrect parsing typically results
+/// in empty maps due to wrong flag interpretation.
 pub fn try_parse_fh4<'a, P: Pe<'a>>(pe: P, data: &[u8]) -> Result<FuncInfo4> {
-	match FuncInfo4::parse(pe, data) {
-		Ok(fh4) => Ok(fh4),
-		Err(_) => try_parse_indirect_fh4(pe, data),
+	let direct_result = FuncInfo4::parse(pe, data);
+	let indirect_result = try_parse_indirect_fh4(pe, data);
+
+	match (&direct_result, &indirect_result) {
+		(Ok(direct), Ok(indirect)) => {
+			// Compare which interpretation yielded more data
+			let direct_count = direct.ip_to_state_map.len()
+				+ direct.unwind_map.len()
+				+ direct.try_block_map.len();
+			let indirect_count = indirect.ip_to_state_map.len()
+				+ indirect.unwind_map.len()
+				+ indirect.try_block_map.len();
+
+			// Prefer the result with more content
+			if indirect_count > direct_count {
+				indirect_result
+			} else {
+				direct_result
+			}
+		}
+		(Ok(_), Err(_)) => direct_result,
+		(Err(_), Ok(_)) => indirect_result,
+		(Err(e), Err(_)) => Err(e.clone()),
 	}
 }
 
