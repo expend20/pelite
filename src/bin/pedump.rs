@@ -306,6 +306,7 @@ fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
 
 fn print_exception_directory_as_dumpbin(file: &pelite::pe64::PeFile) {
 	use pelite::pe64::exception_arm64::Arm64ExceptionExt;
+	use pelite::pe64::exception_cseh::UnwindInfoCsehExt;
 	use pelite::pe64::exception_fh3::UnwindInfoFh3Ext;
 	use pelite::pe64::exception_fh4::UnwindInfoFh4Ext;
 
@@ -341,18 +342,66 @@ fn print_exception_directory_as_dumpbin(file: &pelite::pe64::PeFile) {
 						println!("    Handler: {:08x}", handler);
 					}
 
-					// Try FH4 first, then FH3
-					if let Ok(fh4) = info.func_info4() {
-						println!("    EH Handler Data (FH4): Header {:02x}", fh4.header);
-						print_fh4_as_dumpbin(&fh4);
-					} else if let Ok(fh3) = info.func_info3() {
-						println!("    EH Handler Data (FH3):");
-						print_fh3_as_dumpbin(&fh3);
+					// Determine handler type by examining exception data
+					// Order: FH3 (check magic via RVA), CSEH (check valid scope table), FH4
+					{
+						use pelite::pe64::HandlerType;
+						let handler_type = info.handler_type(image.BeginAddress, image.EndAddress);
+						match handler_type {
+							HandlerType::Fh3 => {
+								if let Ok(fh3) = info.func_info3() {
+									println!("    EH Handler Data (FH3):");
+									print_fh3_as_dumpbin(&fh3);
+								}
+							}
+							HandlerType::Cseh => {
+								if let Ok(cseh) = info.c_scope_table() {
+									println!("    C Scope Table (__C_specific_handler):");
+									print_cseh_as_dumpbin(&cseh);
+								}
+							}
+							HandlerType::Fh4 => {
+								if let Ok(fh4) = info.func_info4() {
+									println!("    EH Handler Data (FH4): Header {:02x}", fh4.header);
+									print_fh4_as_dumpbin(&fh4);
+								}
+							}
+							HandlerType::Unknown => {
+								// Try each parser and use whichever works best
+								if let Ok(fh4) = info.func_info4() {
+									if !fh4.ip_to_state_map.is_empty() || !fh4.unwind_map.is_empty() {
+										println!("    EH Handler Data (FH4): Header {:02x}", fh4.header);
+										print_fh4_as_dumpbin(&fh4);
+									}
+								} else if let Ok(fh3) = info.func_info3() {
+									println!("    EH Handler Data (FH3):");
+									print_fh3_as_dumpbin(&fh3);
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 		Err(_) => println!("No Exception Directory found."),
+	}
+}
+
+
+fn print_cseh_as_dumpbin(cseh: &pelite::pe64::exception_cseh::CScopeTable) {
+	println!("    Count of scope table entries: {}", cseh.count);
+	println!();
+	println!("      Begin    End      Handler  Target");
+	println!();
+	for entry in &cseh.entries {
+		let handler_type = if entry.is_finally() { "(__finally)" } else { "(__except)" };
+		println!("      {:08x} {:08x} {:08x} {:08x} {}", 
+			entry.begin_address, 
+			entry.end_address, 
+			entry.handler_address,
+			entry.jump_target,
+			handler_type
+		);
 	}
 }
 

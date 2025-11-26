@@ -302,7 +302,7 @@ Function Table (85)
 
       Begin    End      Handler  Target
 
-      0000224D 00002278 000064AE 00000000
+      0000224d 00002278 000064AE 00000000
 
   000000CC 000022B4 0000231F 0000A034  ??_M@YAXPEAX_K1P6AX0@Z@Z (void __cdecl `eh vector destructor iterator'(void *,unsigned __int64,unsigned __int64,void (__cdecl*)(void *)))
     Unwind version: 1

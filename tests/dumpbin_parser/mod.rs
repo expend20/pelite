@@ -5,11 +5,14 @@ This module parses the text output from `dumpbin /unwindinfo` to extract
 exception handling metadata for use in tests. It supports:
 - FH3 (FuncInfo3) exception handling structures
 - FH4 (FuncInfo4) exception handling structures
+- CSEH (C Structured Exception Handling) structures
 */
 
+pub mod cseh;
 pub mod fh3;
 pub mod fh4;
 
+pub use cseh::*;
 pub use fh3::*;
 pub use fh4::*;
 
