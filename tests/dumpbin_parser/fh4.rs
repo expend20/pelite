@@ -1,13 +1,8 @@
-/*!
-Parser for Microsoft DUMPBIN tool output.
+//! FH4 (FuncInfo4) DUMPBIN parser.
+//!
+//! Parses DUMPBIN output for FH4 exception handling structures.
 
-This module parses the text output from `dumpbin /unwindinfo` to extract
-exception handling metadata for use in tests. It supports:
-- FH4 (FuncInfo4) exception handling structures
-
-Future support planned for:
-- FH3 (FuncInfo3) exception handling structures
-*/
+use super::is_function_header;
 
 //----------------------------------------------------------------
 // FH4 structures
@@ -90,20 +85,8 @@ fn try_parse_fh4_function(lines: &[&str], i: &mut usize) -> Option<ExpectedFh4> 
             is_fh4 = true;
         }
         // Next function starts with format: "  XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX  name"
-        // The key is it has 4 hex numbers at specific positions
-        // We detect it by checking for the raw line pattern (with leading spaces)
-        let raw_line = lines[func_end];
-        if func_end > *i && raw_line.starts_with("  0000") && raw_line.len() > 40 {
-            // Make sure it's a function header by checking for 4 hex parts
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            if parts.len() >= 4 
-               && parts[0].len() == 8 && parts[0].chars().all(|c| c.is_ascii_hexdigit())
-               && parts[1].len() == 8 && parts[1].chars().all(|c| c.is_ascii_hexdigit())
-               && parts[2].len() == 8 && parts[2].chars().all(|c| c.is_ascii_hexdigit())
-               && parts[3].len() == 8 && parts[3].chars().all(|c| c.is_ascii_hexdigit())
-            {
-                break;
-            }
+        if func_end > *i && is_function_header(line) {
+            break;
         }
         // Summary section marks end
         if line == "Summary" {

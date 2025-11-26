@@ -291,7 +291,7 @@ fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
 		}
 	}
 	if args.exceptions {
-		print_exception_directory_as_original_pedump(&file);
+		print_exception_directory_as_dumpbin(&file);
 	}
 	if args.debug_info {
 		print!("{}", SEPARATOR);
@@ -304,8 +304,9 @@ fn dump_pe64(args: &Parameters, file: pelite::pe64::PeFile) {
 	}
 }
 
-fn print_exception_directory_as_original_pedump(file: &pelite::pe64::PeFile) {
+fn print_exception_directory_as_dumpbin(file: &pelite::pe64::PeFile) {
 	use pelite::pe64::exception_arm64::Arm64ExceptionExt;
+	use pelite::pe64::exception_fh3::UnwindInfoFh3Ext;
 	use pelite::pe64::exception_fh4::UnwindInfoFh4Ext;
 
 	print!("{}", SEPARATOR);
@@ -340,9 +341,13 @@ fn print_exception_directory_as_original_pedump(file: &pelite::pe64::PeFile) {
 						println!("    Handler: {:08x}", handler);
 					}
 
+					// Try FH4 first, then FH3
 					if let Ok(fh4) = info.func_info4() {
 						println!("    EH Handler Data (FH4): Header {:02x}", fh4.header);
-						print_fh4_as_original_pedump(&fh4);
+						print_fh4_as_dumpbin(&fh4);
+					} else if let Ok(fh3) = info.func_info3() {
+						println!("    EH Handler Data (FH3):");
+						print_fh3_as_dumpbin(&fh3);
 					}
 				}
 			}
@@ -351,7 +356,7 @@ fn print_exception_directory_as_original_pedump(file: &pelite::pe64::PeFile) {
 	}
 }
 
-fn print_fh4_as_original_pedump(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
+fn print_fh4_as_dumpbin(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 	println!("    Unwind Map:");
 	println!("      Current State  Next State | Raw: Offset   Next Offset | Action");
 	
@@ -375,7 +380,7 @@ fn print_fh4_as_original_pedump(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 		let target_offset = (entry.offset as i32 + entry.next_offset) as u32;
 		let next_state = find_state_by_offset(target_offset);
 
-		// Format next_offset as signed hex (e.g. -00000001) to match original pedump
+		// Format next_offset as signed hex (e.g. -00000001) to match dumpbin
 		let next_offset_hex = if entry.next_offset < 0 {
 			format!("-{:08x}", -entry.next_offset)
 		} else {
@@ -423,6 +428,63 @@ fn print_fh4_as_original_pedump(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 			entry.delta, 
 			entry.state + 1
 		);
+	}
+}
+
+fn print_fh3_as_dumpbin(fh3: &pelite::pe64::exception_fh3::FuncInfo3) {
+	println!("      Magic Number:                  {:08x}", fh3.magic_number);
+	println!("      Max State:                     {}", fh3.max_state);
+	println!("      RVA to Unwind Map:             {:08x}", fh3.unwind_map_rva);
+	println!("      Number of Try Blocks:          {:08x}", fh3.try_block_count);
+	println!("      RVA to Try Block Map:          {:08x}", fh3.try_block_map_rva);
+	println!("      Number of IP Map Entries:      {:08x}", fh3.ip_map_count);
+	println!("      RVA to IP to State Map:        {:08x}", fh3.ip_map_rva);
+	println!("      Frame Offset of Unwind Helper: {:08x}", fh3.frame_offset as u32);
+	println!("      RVA to ES Type List:           {:08x}", fh3.es_type_list_rva);
+	println!("      EH Flags:                      {:08x}", fh3.eh_flags);
+
+	// Print IP to State Map
+	if !fh3.ip_to_state_map.is_empty() {
+		println!("    IP to State Map:");
+		println!("            IP      State");
+		for entry in fh3.ip_to_state_map.iter() {
+			println!("      {:08x} {:10}", entry.ip_rva, entry.state);
+		}
+	}
+
+	// Print Unwind Map
+	if !fh3.unwind_map.is_empty() {
+		println!("    Unwind Map:");
+		println!("      Current State  Next State  RVA to Action");
+		for (i, entry) in fh3.unwind_map.iter().enumerate() {
+			let action_str = if entry.action_rva != 0 {
+				format!("{:08x}", entry.action_rva)
+			} else {
+				"00000000".to_string()
+			};
+			println!("      {:13}  {:10}       {}", i, entry.next_state, action_str);
+		}
+	}
+
+	// Print Try Block Map
+	if !fh3.try_block_map.is_empty() {
+		for (i, entry) in fh3.try_block_map.iter().enumerate() {
+			println!("    Try Block Map #{}:", i);
+			println!("      Lowest Try State:                    {}", entry.try_low);
+			println!("      Highest Try State:                   {}", entry.try_high);
+			println!("      Highest State of Associated Catches: {}", entry.catch_high);
+			println!("      Number of Associated Catches:        {:08x}", entry.handlers.len());
+			println!("      RVA to Catch Handler Array:          {:08x}", entry.handlers_rva);
+			
+			for (j, handler) in entry.handlers.iter().enumerate() {
+				println!("      Catch Handler #{}:", j);
+				println!("        Handler Type Adjectives:                {:08x}", handler.adjectives);
+				println!("        RVA to Type Descriptor:                 {:08x}", handler.type_desc_rva);
+				println!("        Frame offset of Catch Object:           {:08x}", handler.catch_obj_offset);
+				println!("        RVA to Catch Handler:                   {:08x}", handler.handler_rva);
+				println!("        Distance Between Handler and Parent FP: {:08x}", handler.disp_frame);
+			}
+		}
 	}
 }
 
