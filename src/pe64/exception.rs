@@ -11,6 +11,9 @@ use super::image::*;
 use super::Pe;
 use crate::pe64::exception_fh3::FH3_MAGIC;
 
+// Re-export unwind code types from the dedicated module
+pub use crate::pe64::exception_uc::{decode_unwind_codes, DecodedUnwindCode, DecodedUnwindOp};
+
 //----------------------------------------------------------------
 
 /// Type of exception handler detected from unwind info.
@@ -213,6 +216,10 @@ impl<'a, P: Pe<'a>> UnwindInfo<'a, P> {
 	pub fn unwind_codes(&self) -> &'a [UNWIND_CODE] {
 		let len = self.image.CountOfCodes as usize;
 		unsafe { slice::from_raw_parts(self.image.UnwindCode.as_ptr(), len) }
+	}
+	/// Decodes the raw unwind codes into a higher-level representation.
+	pub fn decoded_unwind_codes(&self) -> Vec<DecodedUnwindCode> {
+		decode_unwind_codes(self.unwind_codes())
 	}
 	pub fn handler(&self) -> Option<u32> {
 		let flags = self.flags();

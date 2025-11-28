@@ -127,6 +127,7 @@ pub mod exception_arm64;
 pub mod exception_cseh;
 pub mod exception_fh3;
 pub mod exception_fh4;
+pub mod exception_uc;
 pub mod exports;
 mod file;
 pub mod headers;

@@ -337,6 +337,15 @@ fn print_exception_directory_as_dumpbin(file: &pelite::pe64::PeFile) {
 					println!("    Unwind flags: {:x}", info.flags());
 					println!("    Size of prologue: {:#x}", info.size_of_prolog());
 					println!("    Count of codes: {}", info.image().CountOfCodes);
+					
+					// Print decoded unwind codes
+					let decoded_codes = info.decoded_unwind_codes();
+					if !decoded_codes.is_empty() {
+						println!("    Unwind codes:");
+						for code in &decoded_codes {
+							println!("      {}", code);
+						}
+					}
 
 					if let Some(handler) = info.handler() {
 						println!("    Handler: {:08x}", handler);
