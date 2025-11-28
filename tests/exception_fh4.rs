@@ -10,6 +10,7 @@ mod dumpbin_parser;
 
 use dumpbin_parser::{parse_fh4_functions, ExpectedFh4};
 use pelite::pe64::{Pe, PeFile};
+use pelite::pe64::exception::{HandlerType};
 use pelite::pe64::exception_fh4::{FuncInfo4, UnwindInfoFh4Ext};
 use pelite::FileMap;
 use std::fs;
@@ -132,6 +133,14 @@ fn fh4_parsing() {
             // Get unwind info and parse FH4
             let unwind_info = func.unwind_info()
                 .unwrap_or_else(|e| panic!("[{}] UnwindInfo failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));
+            
+            // Verify handler_type() correctly identifies this as FH4
+            let handler_type = unwind_info.handler_type(expected.begin_address, expected.end_address);
+            assert_eq!(
+                handler_type, HandlerType::Fh4,
+                "[{}] handler_type() should return Fh4 for function at 0x{:X}, got {:?}",
+                base_name, expected.begin_address, handler_type
+            );
             
             let fh4 = unwind_info.func_info4()
                 .unwrap_or_else(|e| panic!("[{}] FH4 parsing failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));

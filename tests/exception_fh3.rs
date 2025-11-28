@@ -13,6 +13,7 @@ mod dumpbin_parser;
 
 use dumpbin_parser::{parse_fh3_functions, ExpectedFh3};
 use pelite::pe64::{Pe, PeFile};
+use pelite::pe64::exception::{HandlerType};
 use pelite::pe64::exception_fh3::{FuncInfo3, UnwindInfoFh3Ext};
 use pelite::FileMap;
 use std::fs;
@@ -143,6 +144,14 @@ fn fh3_parsing() {
             // Get unwind info and parse FH3
             let unwind_info = func.unwind_info()
                 .unwrap_or_else(|e| panic!("[{}] UnwindInfo failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));
+            
+            // Verify handler_type() correctly identifies this as FH3
+            let handler_type = unwind_info.handler_type(expected.begin_address, expected.end_address);
+            assert_eq!(
+                handler_type, HandlerType::Fh3,
+                "[{}] handler_type() should return Fh3 for function at 0x{:X}, got {:?}",
+                base_name, expected.begin_address, handler_type
+            );
             
             let fh3 = unwind_info.func_info3()
                 .unwrap_or_else(|e| panic!("[{}] FH3 parsing failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));

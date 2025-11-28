@@ -13,6 +13,7 @@ mod dumpbin_parser;
 
 use dumpbin_parser::{parse_cseh_functions, ExpectedCseh};
 use pelite::pe64::{Pe, PeFile};
+use pelite::pe64::exception::{HandlerType};
 use pelite::pe64::exception_cseh::{CScopeTable, UnwindInfoCsehExt};
 use pelite::FileMap;
 use std::fs;
@@ -141,6 +142,14 @@ fn cseh_parsing() {
             let unwind_info = func.unwind_info()
                 .unwrap_or_else(|e| panic!("[{}] UnwindInfo failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));
             
+            // Verify handler_type() correctly identifies this as CSEH
+            let handler_type = unwind_info.handler_type(expected.begin_address, expected.end_address);
+            assert_eq!(
+                handler_type, HandlerType::Cseh,
+                "[{}] handler_type() should return Cseh for function at 0x{:X}, got {:?}",
+                base_name, expected.begin_address, handler_type
+            );
+            
             let scope_table = unwind_info.c_scope_table()
                 .unwrap_or_else(|e| panic!("[{}] C Scope Table parsing failed for function at 0x{:X}: {:?}", base_name, expected.begin_address, e));
             
@@ -255,4 +264,6 @@ fn cseh_txt_parser_sanity_check() {
     assert!(total_cseh_functions > 0,
         "Expected at least some CSEH functions across all test files, got none");
 }
+
+
 

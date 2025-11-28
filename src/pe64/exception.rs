@@ -348,15 +348,10 @@ impl<'a, P: Pe<'a>> UnwindInfo<'a, P> {
 			}
 		}
 		
-		// Default to FH4 or unknown based on header byte
-		// FH4 header has specific flag patterns
-		let header = data[0];
-		if (header & 0x38) != 0 {
-			// Has at least one of the map RVA flags set
-			return HandlerType::Fh4;
-		}
-		
-		HandlerType::Unknown
+		// If we get here, it's likely FH4 (the default for modern MSVC C++ EH)
+		// FH4 uses variable-length encoding and may have minimal headers
+		// without any map RVA flags set for simple functions
+		HandlerType::Fh4
 	}
 }
 impl<'a, P: Pe<'a>> fmt::Debug for UnwindInfo<'a, P> {
