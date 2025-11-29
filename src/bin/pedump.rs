@@ -421,7 +421,7 @@ fn print_fh4_as_dumpbin(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 	// Helper to find state by offset
 	let find_state_by_offset = |target_offset: u32| -> i32 {
 		for (idx, entry) in fh4.unwind_map.iter().enumerate() {
-			if entry.offset == target_offset {
+			if entry.entry_offset == target_offset {
 				return idx as i32;
 			}
 		}
@@ -430,12 +430,12 @@ fn print_fh4_as_dumpbin(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 
 	for (i, entry) in fh4.unwind_map.iter().enumerate() {
 		let action_str = if entry.type_ == 3 {
-			format!("Dtor RVA: {:08x}", entry.action)
+			format!("Dtor RVA: {:08x}", entry.action_rva)
 		} else {
 			"No unwind state".to_string()
 		};
 		
-		let target_offset = (entry.offset as i32 + entry.next_offset) as u32;
+		let target_offset = (entry.entry_offset as i32 + entry.next_offset) as u32;
 		let next_state = find_state_by_offset(target_offset);
 
 		// Format next_offset as signed hex (e.g. -00000001) to match dumpbin
@@ -448,7 +448,7 @@ fn print_fh4_as_dumpbin(fh4: &pelite::pe64::exception_fh4::FuncInfo4) {
 		println!("      {:13}  {:10} |    {:08x}     {:>9} | {}", 
 			i, 
 			next_state, 
-			entry.offset, 
+			entry.entry_offset, 
 			next_offset_hex, 
 			action_str
 		);

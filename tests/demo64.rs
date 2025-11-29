@@ -222,7 +222,7 @@ fn exception() {
 	let file = PeFile::from_bytes(&file_map).unwrap();
 	let exception = file.exception().unwrap();
 
-	assert_eq!(exception.functions().len(), 38);
+	assert_eq!(exception.functions().count(), 38);
 }
 
 //----------------------------------------------------------------

@@ -192,6 +192,14 @@ pub unsafe trait Pe<'a>: PeObject<'a> + Copy {
 			}
 		}
 	}
+	/// Converts a relative virtual address to file offset, returning None if not mappable.
+	///
+	/// This is a convenience wrapper around `rva_to_file_offset` that returns `None`
+	/// instead of an error, useful for batch operations where errors are expected.
+	fn try_rva_to_file_offset(self, rva: Rva) -> Option<usize> {
+		self.rva_to_file_offset(rva).ok()
+	}
+
 	/// Converts from virtual address to relative virtual address.
 	///
 	/// # Errors

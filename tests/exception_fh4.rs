@@ -197,9 +197,9 @@ fn verify_fh4(fh4: &FuncInfo4, expected: &ExpectedFh4, file_name: &str) {
         .zip(&expected.unwind_map).enumerate() 
     {
         assert_eq!(
-            actual.action, *expected_action,
+            actual.action_rva, *expected_action,
             "[{}] Action RVA mismatch at state {} for function at 0x{:X}. Got 0x{:X} expected 0x{:X}",
-            file_name, i, expected.begin_address, actual.action, expected_action
+            file_name, i, expected.begin_address, actual.action_rva, expected_action
         );
     }
     

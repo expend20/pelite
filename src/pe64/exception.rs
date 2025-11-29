@@ -3,7 +3,7 @@ Exception Directory.
 */
 
 use std::cmp::Ordering;
-use std::{fmt, iter, mem, slice};
+use std::{fmt, mem, slice};
 
 use crate::{Error, Result};
 
@@ -73,9 +73,9 @@ impl<'a, P: Pe<'a>> Exception<'a, P> {
 		self.image.windows(2).all(check_sorted)
 	}
 	/// Gets an iterator over the function records.
-	pub fn functions(&self) -> iter::Map<slice::Iter<'a, RUNTIME_FUNCTION>, impl Clone + FnMut(&'a RUNTIME_FUNCTION) -> Function<'a, P>> {
+	pub fn functions(&self) -> impl Iterator<Item = Function<'a, P>> + Clone {
 		let pe = self.pe;
-		self.image.iter().map(move |image| Function { pe, image })
+		self.image.iter().enumerate().map(move |(index, image)| Function { pe, image, index })
 	}
 	/// Finds the index of the function for the given program counter.
 	pub fn index_of(&self, pc: Rva) -> std::result::Result<usize, usize> {
@@ -99,8 +99,31 @@ impl<'a, P: Pe<'a>> Exception<'a, P> {
 			.map(|index| Function {
 				pe: self.pe,
 				image: &self.image[index],
+				index,
 			})
 			.ok()
+	}
+	/// Gets the file offset of the RUNTIME_FUNCTION entry at the given index.
+	///
+	/// This is useful for patching operations where you need to modify the
+	/// RUNTIME_FUNCTION entry directly in the file.
+	pub fn function_file_offset(&self, index: usize) -> Result<usize> {
+		if index >= self.image.len() {
+			return Err(Error::Bounds);
+		}
+		let datadir = self.pe.data_directory().get(IMAGE_DIRECTORY_ENTRY_EXCEPTION).ok_or(Error::Bounds)?;
+		let base_rva = datadir.VirtualAddress;
+		let entry_rva = base_rva + (index * mem::size_of::<RUNTIME_FUNCTION>()) as u32;
+		self.pe.rva_to_file_offset(entry_rva)
+	}
+	/// Gets the RVA of the RUNTIME_FUNCTION entry at the given index.
+	pub fn function_rva(&self, index: usize) -> Result<Rva> {
+		if index >= self.image.len() {
+			return Err(Error::Bounds);
+		}
+		let datadir = self.pe.data_directory().get(IMAGE_DIRECTORY_ENTRY_EXCEPTION).ok_or(Error::Bounds)?;
+		let base_rva = datadir.VirtualAddress;
+		Ok(base_rva + (index * mem::size_of::<RUNTIME_FUNCTION>()) as u32)
 	}
 }
 #[rustfmt::skip]
@@ -134,6 +157,8 @@ impl<'a, P: Pe<'a>> fmt::Debug for Exception<'a, P> {
 pub struct Function<'a, P> {
 	pe: P,
 	image: &'a RUNTIME_FUNCTION,
+	/// Index of this function in the exception directory
+	index: usize,
 }
 impl<'a, P: Pe<'a>> Function<'a, P> {
 	/// Gets the PE instance.
@@ -143,6 +168,21 @@ impl<'a, P: Pe<'a>> Function<'a, P> {
 	/// Returns the underlying runtime function image.
 	pub fn image(&self) -> &'a RUNTIME_FUNCTION {
 		self.image
+	}
+	/// Returns the index of this function in the exception directory.
+	pub fn index(&self) -> usize {
+		self.index
+	}
+	/// Gets the RVA of this RUNTIME_FUNCTION entry.
+	pub fn rva(&self) -> Result<Rva> {
+		let datadir = self.pe.data_directory().get(IMAGE_DIRECTORY_ENTRY_EXCEPTION).ok_or(Error::Bounds)?;
+		let base_rva = datadir.VirtualAddress;
+		Ok(base_rva + (self.index * mem::size_of::<RUNTIME_FUNCTION>()) as u32)
+	}
+	/// Gets the file offset of this RUNTIME_FUNCTION entry.
+	pub fn file_offset(&self) -> Result<usize> {
+		let rva = self.rva()?;
+		self.pe.rva_to_file_offset(rva)
 	}
 	/// Gets the function bytes.
 	pub fn bytes(&self) -> Result<&'a [u8]> {
@@ -156,9 +196,10 @@ impl<'a, P: Pe<'a>> Function<'a, P> {
 	}
 	/// Gets the unwind info.
 	pub fn unwind_info(&self) -> Result<UnwindInfo<'a, P>> {
+		let unwind_rva = self.image.UnwindData;
 		// Read as many bytes as we can for interpretation
 		let bytes = self.pe.slice(
-			self.image.UnwindData,
+			unwind_rva,
 			mem::size_of::<UNWIND_INFO>(),
 			if cfg!(feature = "unsafe_alignment") { 1 } else { mem::align_of::<UNWIND_INFO>() },
 		)?;
@@ -169,7 +210,7 @@ impl<'a, P: Pe<'a>> Function<'a, P> {
 			return Err(Error::Bounds);
 		}
 		// Ok
-		Ok(UnwindInfo { pe: self.pe, image })
+		Ok(UnwindInfo { pe: self.pe, image, unwind_rva })
 	}
 }
 #[rustfmt::skip]
@@ -188,6 +229,8 @@ impl<'a, P: Pe<'a>> fmt::Debug for Function<'a, P> {
 pub struct UnwindInfo<'a, P> {
 	pe: P,
 	image: &'a UNWIND_INFO,
+	/// RVA of this unwind info structure
+	unwind_rva: Rva,
 }
 impl<'a, P: Pe<'a>> UnwindInfo<'a, P> {
 	/// Gets the PE instance.
@@ -197,6 +240,36 @@ impl<'a, P: Pe<'a>> UnwindInfo<'a, P> {
 	/// Returns the underlying unwind info image.
 	pub fn image(&self) -> &'a UNWIND_INFO {
 		self.image
+	}
+	/// Gets the RVA of this unwind info structure.
+	pub fn rva(&self) -> Rva {
+		self.unwind_rva
+	}
+	/// Gets the file offset of this unwind info structure.
+	pub fn file_offset(&self) -> Result<usize> {
+		self.pe.rva_to_file_offset(self.unwind_rva)
+	}
+	/// Gets the RVA of the exception data (handler data after unwind codes).
+	/// 
+	/// Returns the RVA where the exception handler-specific data starts,
+	/// which is right after the handler RVA.
+	pub fn exception_data_rva(&self) -> Result<Rva> {
+		let flags = self.flags();
+		if (flags & UNW_FLAG_EHANDLER) != 0 || (flags & UNW_FLAG_UHANDLER) != 0 {
+			let codes_len = self.image.CountOfCodes as usize;
+			let aligned_codes_len = if codes_len % 2 == 0 { codes_len } else { codes_len + 1 };
+			// Offset to exception data: UNWIND_INFO header + aligned unwind codes + handler RVA (4 bytes)
+			let offset = mem::size_of::<UNWIND_INFO>() + aligned_codes_len * mem::size_of::<UNWIND_CODE>() + 4;
+			Ok(self.unwind_rva + offset as u32)
+		}
+		else {
+			Err(Error::Bounds)
+		}
+	}
+	/// Gets the file offset of the exception data.
+	pub fn exception_data_file_offset(&self) -> Result<usize> {
+		let rva = self.exception_data_rva()?;
+		self.pe.rva_to_file_offset(rva)
 	}
 	pub fn version(&self) -> u8 {
 		self.image.VersionFlags & 0b00000111
