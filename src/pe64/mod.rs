@@ -124,6 +124,10 @@ pub(crate) mod base_relocs;
 pub mod debug;
 pub mod exception;
 pub mod exception_arm64;
+pub mod exception_cseh;
+pub mod exception_fh3;
+pub mod exception_fh4;
+pub mod exception_uc;
 pub mod exports;
 mod file;
 pub mod headers;
@@ -139,6 +143,7 @@ pub(crate) mod security;
 pub mod tls;
 mod view;
 
+pub use self::exception::HandlerType;
 pub use self::file::PeFile;
 pub use self::image::{Rva, Va};
 pub use self::pe::{Align, Pe, PeObject};
