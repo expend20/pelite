@@ -175,7 +175,8 @@ pub fn encode_uvarint(value: u32) -> Vec<u8> {
 const FH4_HAS_BBT_FLAGS: u8 = 0x01;      // BBT flags present (4 bytes)
 const FH4_HAS_UNWIND_MAP: u8 = 0x08;     // Unwind map RVA present
 const FH4_HAS_TRY_BLOCK_MAP: u8 = 0x10;  // Try block map RVA present
-const FH4_HAS_IP_TO_STATE: u8 = 0x20;    // IP to state map RVA present
+#[allow(dead_code)]
+const FH4_EHS_FLAG: u8 = 0x20;           // EHs (synchronized exceptions) flag - NOT ip2state presence
 #[allow(dead_code)]
 const FH4_IS_CATCH_FUNCLET: u8 = 0x02;   // Is catch funclet
 #[allow(dead_code)]
@@ -337,8 +338,9 @@ impl FuncInfo4 {
 			0
 		};
 		
-		// Read IP to State Map RVA if present
-		let ip_rva = if (header & FH4_HAS_IP_TO_STATE) != 0 {
+		// IP to State Map RVA is always present for non-catch-funclet functions
+		// Note: The 0x20 flag (EHs) indicates synchronized exceptions mode, NOT ip2state presence
+		let ip_rva = if (header & FH4_IS_CATCH_FUNCLET) == 0 {
 			if data.len() < offset + 4 { return Err(Error::Bounds); }
 			let mut buf = [0u8; 4];
 			buf.copy_from_slice(&data[offset..offset + 4]);
@@ -368,23 +370,30 @@ impl FuncInfo4 {
 				let back_offset = (val >> 2) as i32;
 				let next_offset = -back_offset;
 
-				let action = if type_ == 3 {
+				// Types that have action RVA:
+				// - Type 1: Dtor with frame offset (has action RVA + frame offset varint)
+				// - Type 2: Dtor with Object Pointer (has action RVA + frame offset varint)
+				// - Type 3: Dtor RVA (has action RVA only)
+				// - Type 0: No action
+				let (action, action_rva_file_offset) = if type_ >= 1 && type_ <= 3 {
 					if reader.ptr.len() < 4 { return Err(Error::Bounds); }
+					let action_offset = bytes.len() - reader.ptr.len();
 					let mut buf = [0u8; 4];
 					buf.copy_from_slice(&reader.ptr[0..4]);
 					reader.ptr = &reader.ptr[4..];
-					u32::from_le_bytes(buf)
+					let action_rva = u32::from_le_bytes(buf);
+					
+					// Types 1 and 2 also have a frame offset (varint) after the action RVA
+					if type_ == 1 || type_ == 2 {
+						let _frame_offset = reader.read_u32()?;
+					}
+					
+					(action_rva, Some(base_file_offset + action_offset))
 				} else {
-					0
+					(0, None)
 				};
 				
 				let entry_end = bytes.len() - reader.ptr.len();
-				
-				let action_rva_file_offset = if type_ == 3 {
-					Some(base_file_offset + entry_end - 4)
-				} else {
-					None
-				};
 				
 				unwind_map.push(UnwindMapEntry4 {
 					entry_offset: entry_start as u32,
@@ -440,7 +449,12 @@ impl FuncInfo4 {
 						let h_header = h_reader.ptr[0];
 						h_reader.ptr = &h_reader.ptr[1..];
 
-						let adj = h_reader.read_u32()?;
+						// Adjectives are only present if bit 0x01 is set in handler header
+						let adj = if (h_header & 0x01) != 0 {
+							h_reader.read_u32()?
+						} else {
+							0
+						};
 						
 						let (type_desc_rva, type_desc_rva_file_offset) = if (h_header & 0x02) != 0 {
 							let td_offset = h_bytes.len() - h_reader.ptr.len();
@@ -563,7 +577,18 @@ pub fn try_parse_fh4<'a, P: Pe<'a>>(
 
 	match (&direct_result, &indirect_result) {
 		(Ok(direct), Ok(indirect)) => {
-			// Compare which interpretation yielded more data
+			// For __CxxFrameHandler4, the standard format is indirect (RVA to FH4 data).
+			// Prefer indirect when it has meaningful ip2state data, as this is critical
+			// for exception handling. Direct parsing of the RVA bytes often produces
+			// garbage due to misinterpreting the RVA as a header byte.
+			if indirect.ip_to_state_map.len() > 0 {
+				return indirect_result;
+			}
+			if direct.ip_to_state_map.len() > 0 {
+				return direct_result;
+			}
+			
+			// Fall back to comparing total content
 			let direct_count = direct.ip_to_state_map.len()
 				+ direct.unwind_map.len()
 				+ direct.try_block_map.len();
@@ -571,8 +596,7 @@ pub fn try_parse_fh4<'a, P: Pe<'a>>(
 				+ indirect.unwind_map.len()
 				+ indirect.try_block_map.len();
 
-			// Prefer the result with more content
-			if indirect_count > direct_count {
+			if indirect_count >= direct_count {
 				indirect_result
 			} else {
 				direct_result

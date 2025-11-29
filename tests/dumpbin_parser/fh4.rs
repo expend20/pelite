@@ -144,7 +144,9 @@ fn try_parse_fh4_function(lines: &[&str], i: &mut usize) -> Option<ExpectedFh4> 
         // Parse Unwind Map entries
         // Format: "                  0          -1 |    00000001     -00000001 | No unwind state"
         // or:     "                  1           0 |    00000002     -00000001 | Dtor RVA: 00006320"
-        if in_unwind_map_section && (line.contains("No unwind state") || line.contains("Dtor RVA:")) {
+        // or:     "                  0          -1 |    ... | Dtor with Object Pointer: RVA: 00002063 ..."
+        // or:     "                  0          -1 |    ... | Dtor with Object: RVA: 00001A2D ..."
+        if in_unwind_map_section && (line.contains("No unwind state") || line.contains("Dtor RVA:") || line.contains("Dtor with Object")) {
             if let Some((next_state, action)) = parse_unwind_map_line(line) {
                 func.unwind_map.push((next_state, action));
             }
@@ -185,6 +187,8 @@ fn parse_ip_state_line(line: &str) -> Option<(u32, i32)> {
 fn parse_unwind_map_line(line: &str) -> Option<(i32, u32)> {
     // Format: "                  0          -1 |    00000001     -00000001 | No unwind state"
     // or:     "                  1           0 |    00000002     -00000001 | Dtor RVA: 00006320"
+    // or:     "                  0          -1 |    ... | Dtor with Object Pointer: RVA: 00002063 ..."
+    // or:     "                  0          -1 |    ... | Dtor with Object: RVA: 00001A2D ..."
     let parts: Vec<&str> = line.split('|').collect();
     if parts.len() < 3 {
         return None;
@@ -201,6 +205,11 @@ fn parse_unwind_map_line(line: &str) -> Option<(i32, u32)> {
     let action_part = parts[2].trim();
     let action = if action_part.contains("Dtor RVA:") {
         let rva_str = action_part.split("Dtor RVA:").nth(1)?.trim();
+        u32::from_str_radix(rva_str, 16).ok()?
+    } else if action_part.contains("Dtor with Object") {
+        // Format: "Dtor with Object Pointer: RVA: 00002063 Frame offset..."
+        // or:     "Dtor with Object: RVA: 00001A2D Frame offset..."
+        let rva_str = action_part.split("RVA:").nth(1)?.trim().split_whitespace().next()?;
         u32::from_str_radix(rva_str, 16).ok()?
     } else {
         0 // No unwind state
